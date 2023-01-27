@@ -4,7 +4,6 @@ const math = require('canvas-sketch-util/math');
 
 const settings = {
     dimensions: [ 1080, 1080 ],
-    animate: true,
 };
 
 const params = {
@@ -23,6 +22,8 @@ const params = {
     colors: true,
     colorsTransparency: 50,
 };
+
+let manager;
 
 const sketch = () => {
     return ({ context, width, height, frame }) => {
@@ -102,7 +103,11 @@ const createPane = () => {
     folder.addInput(params, 'arcs');
     folder.addInput(params, 'colors');
     folder.addInput(params, 'colorsTransparency', { min: 0, max: 100 })
+
+    pane.on('change', ev => {
+      manager.render();
+    });
 };
-  
+
 createPane();
-canvasSketch(sketch, settings);
+canvasSketch(sketch, settings).then(e => manager = e);
