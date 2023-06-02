@@ -10,7 +10,7 @@ const settings = {
 const sketch = ({ context, width, height }) => {
   const agents = [];
 
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 6; i++) {
     const x = random.range(0, width);
     const y = random.range(0, height);
 
@@ -29,9 +29,13 @@ const sketch = ({ context, width, height }) => {
 
         const dist = agent.pos.getDistante(other.pos);
 
-        if (dist > 200) continue;
+        // if (dist > 200) continue;
 
-        context.lineWidth = math.mapRange(dist, 0, 200, 12, 1);
+        agent.attractTo(other);
+        other.attractTo(agent);
+
+        // context.lineWidth = math.mapRange(dist, 0, 200, 12, 1);
+        context.lineWidth = 120 / dist;
 
         context.beginPath();
         context.moveTo(agent.pos.x, agent.pos.y);
@@ -68,7 +72,9 @@ class Agent {
   constructor (x, y) {
     this.pos = new Vector(x, y);
     this.vel = new Vector(random.range(-1, 1), random.range(-1, 1));
-    this.radius = random.range(4, 12);
+    // this.radius = random.range(4, 12);
+    this.radius = 12;
+    this.charge = random.boolean();
   }
 
   bounce(width, height) {
@@ -84,14 +90,32 @@ class Agent {
   draw (context) {
     context.save();
     context.translate(this.pos.x, this.pos.y);
+    context.fillStyle = this.charge ? 'red' : 'blue';
 
     context.lineWidth = 4;
 
     context.beginPath();
     context.arc(0, 0, this.radius, 0, Math.PI *2);
     context.fill();
-    context.stroke();
+    // context.stroke();
 
     context.restore();
+  }
+
+  attractTo(other) {
+    const dist = this.pos.getDistante(other.pos);
+    
+    // if (dist > 200) return;
+
+    const forceX = (other.pos.x - this.pos.x) / (dist * 50);
+    const forceY = (other.pos.y - this.pos.y) / (dist * 50);
+
+    if (this.charge === other.charge) {
+      this.vel.x -= forceX;
+      this.vel.y -= forceY;
+    } else {
+      this.vel.x += forceX;
+      this.vel.y += forceY;
+    }
   }
 }
